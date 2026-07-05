@@ -66,7 +66,7 @@ Create one Japanese daily digest issue for `yuriemori/daily-tech-digest` only wh
 
 ## Required setup behavior
 
-This workflow is designed to run with the repository `GITHUB_TOKEN`, read-only agent permissions, and the configured `create-issue` safe output. If a first run discovers missing or unusable authentication, token permissions, safe-output capability, or required labels/secrets, do not fail silently. Instead, create one help issue with:
+This workflow is designed to run with the repository `GITHUB_TOKEN`, read-only agent permissions, and the configured `create-issue` safe output. The agent job remains read-only; the generated safe-output job performs issue creation with its own scoped `issues: write` permission. If a first run discovers missing or unusable authentication, token permissions, safe-output capability, or required labels/secrets, do not fail silently. Instead, create one help issue with:
 
 - title: `Daily Tech Digest Setup Help - YYYY-MM-DD (JST)`
 - the missing item and observed error
@@ -80,12 +80,13 @@ If issue creation itself is unavailable, call `noop` and include the same setup 
    - Prefer the timestamp of the previous successful run of this workflow before the current run.
    - Use `gh` read commands/API calls against the current repository to inspect workflow runs. Exclude the current run.
    - If there is no previous successful run, use `lookback_hours` for manual dispatch or 24 hours for scheduled runs.
-2. Read past digest issues with label `daily-digest` and titles matching `Daily Tech Digest -` to collect already-published source URLs. Treat source URL as the primary deduplication key.
-3. Load `/tmp/gh-aw/cache-memory/processed-urls.json` if present and treat those URLs as additional deduplication keys. Before finishing, update this file with all source URLs included in this run. Use valid JSON.
-4. Fetch the source pages and identify updates published after the window start and before the run time. Prefer official publication timestamps. If a timestamp cannot be determined confidently, include the item only when it is clearly new and not already present in past issues/cache.
+2. Read recent digest issues with label `daily-digest` and titles matching `Daily Tech Digest -` to collect already-published source URLs, starting with the newest issues and paging only as needed. To keep runs bounded, do not fetch every historical issue body up front; after collecting candidate URLs from the sources, search issues for each candidate URL if it was not found in the recent digest set or cache. Treat source URL as the primary deduplication key.
+3. Load `/tmp/gh-aw/cache-memory/processed-urls.json` if present and treat those URLs as additional deduplication keys. Update this file only as described in step 8, and always keep it as valid JSON.
+4. Fetch the source pages and identify updates published after the window start and before the run time. Prefer official publication timestamps from RSS/Atom feeds, page metadata such as `article:published_time`, or visible source listing dates. If no reliable timestamp is available, exclude the item unless the source listing shows a date inside the window and the item is not already present in past issues/cache.
 5. Skip any source URL already included in a previous digest issue or cache.
 6. If there are no new qualifying updates, call `noop` with the window and reason. Do not create an issue.
 7. Before creating an issue, search for an existing issue titled `Daily Tech Digest - YYYY-MM-DD (JST)`. If one exists, call `noop` and reference it instead of creating a duplicate.
+8. For non-dry-run digest creation, write the updated processed URL cache after the final item list is decided and before emitting the `create-issue` safe output. Do not update the cache on dry runs or duplicate/no-update noop outcomes.
 
 ## Priority logic
 
@@ -108,7 +109,7 @@ Body must be Japanese GitHub-flavored Markdown and follow this structure:
 
 ```markdown
 ## エグゼクティブサマリー
-- 3〜5行で、Pre-salesで再利用しやすいビジネス価値・影響を簡潔にまとめる。
+- 3〜5行で、pre-salesで再利用しやすいビジネス価値・影響を簡潔にまとめる。
 
 ## 管理者向けハイライト
 - 管理者向け該当項目がある場合は最重要順に記載。
