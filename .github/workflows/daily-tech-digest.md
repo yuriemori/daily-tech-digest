@@ -35,9 +35,6 @@ tools:
     mode: gh-proxy
     toolsets: [repos, issues, actions, search]
   web-fetch:
-  cache-memory:
-    retention-days: 90
-    allowed-extensions: [".json"]
   cli-proxy: true
   bash: [gh, jq, date, cat, grep, sed, awk, printf, mkdir, ls]
 safe-outputs:
@@ -70,7 +67,7 @@ This workflow is designed to run with the repository `GITHUB_TOKEN`, read-only a
 
 - title: `Daily Tech Digest Setup Help - YYYY-MM-DD (JST)`
 - the missing item and observed error
-- setup steps to enable GitHub Agentic Workflows on the default branch, allow `actions: read` and `issues: read` for the agent job, and let safe outputs create issues with labels `daily-digest`, `japanese-summary`, `github-updates`
+- setup steps to enable GitHub Agentic Workflows on the default branch, allow `actions: read` and `issues: read` for the agent job, and allow the generated safe-output job to use scoped `issues: write` for creating issues with labels `daily-digest`, `japanese-summary`, `github-updates`
 
 If issue creation itself is unavailable, call `noop` and include the same setup guidance in the noop explanation.
 
@@ -80,11 +77,11 @@ If issue creation itself is unavailable, call `noop` and include the same setup 
    - Prefer the timestamp of the previous successful run of this workflow before the current run.
    - Use `gh` read commands/API calls against the current repository to inspect workflow runs. Exclude the current run.
    - If there is no previous successful run, use `lookback_hours` for manual dispatch or 24 hours for scheduled runs.
-2. Read recent digest issues with label `daily-digest` and titles matching `Daily Tech Digest -` to collect already-published source URLs, starting with the newest issues and paging only as needed. To keep runs bounded, do not fetch every historical issue body up front; after collecting candidate URLs from the sources, batch URL searches against issue bodies where possible, and fall back to individual URL searches only for candidates not covered by the recent digest set or cache. Treat source URL as the primary deduplication key.
-3. Load `/tmp/gh-aw/cache-memory/processed-urls.json` if present and treat those URLs as additional deduplication keys. Update the cache only with URLs already confirmed from existing digest issues; do not write current candidate URLs before issue creation, because a failed safe-output write must not mark unpublished items as processed. Always keep the cache as valid JSON.
-4. Fetch the source pages and identify updates published after the window start and before the run time. Prefer official publication timestamps from RSS/Atom feeds, page metadata such as `article:published_time`, or visible source listing dates. If no reliable timestamp is available, exclude the item unless the source listing shows a date inside the window and the item is not already present in past issues/cache.
-5. For `https://github.blog/`, exclude URLs under `/changelog/` because changelog items are collected from the highest-priority GitHub Changelog source first.
-6. Skip any source URL already included in a previous digest issue or cache.
+2. Read recent digest issues with label `daily-digest` and titles matching `Daily Tech Digest -` to collect already-published source URLs, starting with the newest issues and paging only as needed. To keep runs bounded, do not fetch every historical issue body up front; after collecting candidate URLs from the sources, batch URL searches against issue bodies where possible, and fall back to individual URL searches only for candidates not covered by the recent digest set. Treat source URL as the primary deduplication key.
+3. Use past digest issue bodies as the source of truth for deduplication. Do not persist separate processed-URL state before issue creation, because a failed safe-output write must not mark unpublished items as processed.
+4. Fetch the source pages and identify updates published after the window start and before the run time. Prefer official publication timestamps from RSS/Atom feeds, page metadata such as `article:published_time`, or visible source listing dates. If no reliable timestamp is available, exclude the item unless the source listing shows a date inside the window and the item is not already present in past digest issues.
+5. For `https://github.blog/`, exclude URLs whose path starts with `/changelog/` because changelog items are collected from the highest-priority GitHub Changelog source first.
+6. Skip any source URL already included in a previous digest issue.
 7. If there are no new qualifying updates, call `noop` with the window and reason. Do not create an issue.
 8. Before creating an issue, search for an existing issue titled `Daily Tech Digest - YYYY-MM-DD (JST)`. If one exists, call `noop` and reference it instead of creating a duplicate.
 
@@ -109,7 +106,7 @@ Body must be Japanese GitHub-flavored Markdown and follow this structure:
 
 ```markdown
 ## エグゼクティブサマリー
-- 3〜5行で、プリセールスで再利用しやすいビジネス価値・影響を簡潔にまとめる。
+- プリセールスで再利用しやすいビジネス価値・影響を、箇条書き3〜5点で簡潔にまとめる。
 
 ## 管理者向けハイライト
 - 管理者向け該当項目がある場合は最重要順に記載。
