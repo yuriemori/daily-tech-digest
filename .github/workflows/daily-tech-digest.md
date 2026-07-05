@@ -2,7 +2,7 @@
 emoji: 📰
 name: Daily Tech Digest
 description: Create a Japanese daily digest issue for GitHub, DevOps, DevSecOps, and platform updates.
-# スケジュール変更ポイント: 08:00 JST は前日 23:00 UTC。
+# スケジュール変更ポイント: JST は通年 UTC+09:00。08:00 JST に相当する 23:00 UTC で実行。
 on:
   schedule:
     - cron: "0 23 * * *"
@@ -59,7 +59,7 @@ Create one Japanese daily digest issue for `yuriemori/daily-tech-digest` only wh
 - Source URL変更ポイント: collect from `https://github.blog/changelog/` first, then `https://github.blog/` excluding changelog URLs, `https://devblogs.microsoft.com/`, and `https://www.microsoft.com/en-us/security/blog/`.
 - 優先度キーワード変更ポイント: administrator-oriented keywords are `enterprise`, `org policy`, `audit log`, `SSO`, `compliance`, `secret protection`, `governance`, `enterprise managed users`, `rulesets`, `branch protection`, `security settings`, and `billing/admin controls`.
 - Issueテンプレート変更ポイント: the required title and body structure is defined in the "Issue format" section below.
-- スケジュール変更ポイント: the frontmatter cron is UTC; keep `0 23 * * *` for 08:00 JST.
+- スケジュール変更ポイント: the frontmatter cron is UTC; keep `0 23 * * *` for 08:00 JST (JST is always UTC+09:00).
 
 ## Required setup behavior
 
@@ -77,7 +77,7 @@ If issue creation itself is unavailable, call `noop` and include the same setup 
    - Prefer the timestamp of the previous successful run of this workflow before the current run.
    - Use `gh` read commands/API calls against the current repository to inspect workflow runs. Exclude the current run.
    - If there is no previous successful run, use `lookback_hours` for manual dispatch or 24 hours for scheduled runs.
-2. Read recent digest issues with label `daily-digest` and titles matching `Daily Tech Digest -` to collect already-published source URLs, starting with the newest issues and paging only as needed. To keep runs bounded, do not fetch every historical issue body up front; after collecting candidate URLs from the sources, batch URL searches against issue bodies where possible, and fall back to individual URL searches only for candidates not covered by the recent digest set. Treat source URL as the primary deduplication key.
+2. Read up to the newest 120 digest issues from the last 180 days with label `daily-digest` and titles matching `Daily Tech Digest -` to collect already-published source URLs. To keep runs bounded, do not fetch every historical issue body up front; after collecting candidate URLs from the sources, batch URL searches against issue bodies where possible, and fall back to individual URL searches only for candidates not covered by the recent digest set. Treat source URL as the primary deduplication key.
 3. Use past digest issue bodies as the source of truth for deduplication. Do not persist separate processed-URL state before issue creation, because a failed safe-output write must not mark unpublished items as processed.
 4. Fetch the source pages and identify updates published after the window start and before the run time. Prefer official publication timestamps from RSS/Atom feeds, page metadata such as `article:published_time`, or visible source listing dates. If no reliable timestamp is available, exclude the item unless the source listing shows a date inside the window and the item is not already present in past digest issues.
 5. For `https://github.blog/`, exclude URLs whose path starts with `/changelog/` because changelog items are collected from the highest-priority GitHub Changelog source first.
@@ -131,7 +131,7 @@ Body must be Japanese GitHub-flavored Markdown and follow this structure:
 該当なし
 
 ## メタデータ
-- 対象期間: YYYY-MM-DD HH:mm JST 〜 YYYY-MM-DD HH:mm JST
+- 対象期間: YYYY-MM-DD HH:mm JST 〜 YYYY-MM-DD HH:mm JST（UTCの実行時刻・前回成功時刻をJST、UTC+09:00に変換して表示）
 - 重複排除キー: 原文URL
 - 収集ソース: GitHub Changelog / GitHub Blog / Microsoft DevBlogs / Microsoft Security Blog
 ```
