@@ -77,9 +77,9 @@ If issue creation itself is unavailable, call `noop` and include the same setup 
    - Prefer the timestamp of the previous successful run of this workflow before the current run.
    - Use `gh` read commands/API calls against the current repository to inspect workflow runs. Exclude the current run.
    - If there is no previous successful run, use `lookback_hours` for manual dispatch or 24 hours for scheduled runs.
-2. Read up to the newest 120 digest issues from the last 180 days with label `daily-digest` and titles matching `Daily Tech Digest -` to collect already-published source URLs. To keep runs bounded, do not fetch every historical issue body up front; after collecting candidate URLs from the sources, batch URL searches against issue bodies where possible, and fall back to individual URL searches only for candidates not covered by the recent digest set. Treat source URL as the primary deduplication key.
+2. Read up to the newest 45 digest issues from the last 60 days with label `daily-digest` and titles matching `Daily Tech Digest -` to collect already-published source URLs. To keep runs bounded, do not fetch every historical issue body up front; after collecting candidate URLs from the sources, batch URL searches against all digest issue bodies where possible, and fall back to individual URL searches only for candidates not covered by the recent digest set. Treat source URL as the primary deduplication key.
 3. Use past digest issue bodies as the source of truth for deduplication. Do not persist separate processed-URL state before issue creation, because a failed safe-output write must not mark unpublished items as processed.
-4. Fetch the source pages and identify updates published after the window start and before the run time. Prefer official publication timestamps from RSS/Atom feeds, page metadata such as `article:published_time`, or visible source listing dates. If no reliable timestamp is available, exclude the item unless the source listing shows a date inside the window and the item is not already present in past digest issues.
+4. Fetch the source pages and identify updates published after the window start and before the run time. Resolve timestamps in this priority order: RSS/Atom feed timestamp, page metadata such as `article:published_time`, then visible source listing date. If no reliable timestamp is available, exclude the item unless the source listing shows a date inside the window and the item is not already present in past digest issues.
 5. For `https://github.blog/`, exclude URLs whose path starts with `/changelog/` because changelog items are collected from the highest-priority GitHub Changelog source first.
 6. Skip any source URL already included in a previous digest issue.
 7. If there are no new qualifying updates, call `noop` with the window and reason. Do not create an issue.
@@ -131,7 +131,7 @@ Body must be Japanese GitHub-flavored Markdown and follow this structure:
 該当なし
 
 ## メタデータ
-- 対象期間: YYYY-MM-DD HH:mm JST 〜 YYYY-MM-DD HH:mm JST（UTCの実行時刻・前回成功時刻をJST、UTC+09:00に変換して表示）
+- 対象期間: YYYY-MM-DD HH:mm JST 〜 YYYY-MM-DD HH:mm JST（UTCの実行時刻・前回成功時刻をJST、通年UTC+09:00に変換して表示）
 - 重複排除キー: 原文URL
 - 収集ソース: GitHub Changelog / GitHub Blog / Microsoft DevBlogs / Microsoft Security Blog
 ```
