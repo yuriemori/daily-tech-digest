@@ -71,6 +71,10 @@ This workflow is designed to run with the repository `GITHUB_TOKEN`, read-only a
 
 If issue creation itself is unavailable, call `noop` and include the same setup guidance in the noop explanation.
 
+## Fetching external URLs
+
+Always use the `web_fetch` tool to fetch external URLs (source pages, RSS/Atom feeds). Do **not** use `curl`, `wget`, or any shell command for HTTP requests to external domains — these are not available. Use `web_fetch` exclusively for all outbound HTTP/HTTPS requests.
+
 ## Collection and window
 
 1. Determine the reporting window:
