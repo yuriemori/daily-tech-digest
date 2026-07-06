@@ -36,7 +36,7 @@ tools:
     toolsets: [repos, issues, actions, search]
   web-fetch:
   cli-proxy: true
-  bash: [gh, jq, date, cat, grep, sed, awk, printf, mkdir, ls]
+  bash: [gh, jq, date, cat, grep, sed, awk, printf, mkdir, ls, python3]
 safe-outputs:
   create-issue:
     labels: [daily-digest, japanese-summary, github-updates]
