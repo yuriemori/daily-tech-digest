@@ -2,7 +2,7 @@ name: Cron 5min Check
 
 on:
   schedule:
-    - cron: "5 * * * *"
+    - cron: "*/5 * * * *"
 
 jobs:
   hello:
