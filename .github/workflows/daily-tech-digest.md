@@ -36,7 +36,7 @@ tools:
     toolsets: [repos, issues, actions, search]
   web-fetch:
   cli-proxy: true
-  bash: [gh, jq, date, cat, grep, sed, awk, printf, mkdir, ls]
+  bash: [gh, jq, date, cat, grep, sed, awk, printf, mkdir, ls, python3]
 safe-outputs:
   create-issue:
     labels: [daily-digest, japanese-summary, github-updates]
@@ -73,7 +73,19 @@ If issue creation itself is unavailable, call `noop` and include the same setup 
 
 ## Fetching external URLs
 
-Always use the `web_fetch` tool to fetch external URLs (source pages, RSS/Atom feeds). Do **not** use `curl`, `wget`, or any shell command for HTTP requests to external domains — these are not available. Use `web_fetch` exclusively for all outbound HTTP/HTTPS requests.
+To fetch external URLs, use `python3` via bash with an explicit proxy, like this:
+
+```bash
+python3 -c "
+import urllib.request
+proxy = urllib.request.ProxyHandler({'http': 'http://squid-proxy:3128', 'https': 'http://squid-proxy:3128'})
+opener = urllib.request.build_opener(proxy)
+data = opener.open('https://github.blog/changelog/feed/', timeout=30).read().decode('utf-8', errors='replace')
+print(data[:5000])
+"
+```
+
+Do **not** use `curl`, `wget`, or `web_fetch` — these are not available. Always pass the squid proxy (`http://squid-proxy:3128`) explicitly via `ProxyHandler`. Prefer RSS/Atom feed URLs (e.g. `/feed/` or `/feed.xml`) over HTML pages for structured timestamp parsing.
 
 ## Collection and window
 
@@ -126,13 +138,13 @@ Body must be Japanese GitHub-flavored Markdown and follow this structure:
   - **原文URL**: https://...
 
 ### GitHub Blog
-該当なし
+
 
 ### Microsoft DevBlogs
-該当なし
+
 
 ### Microsoft Security Blog
-該当なし
+
 
 ## メタデータ
 - 対象期間: YYYY-MM-DD HH:mm JST 〜 YYYY-MM-DD HH:mm JST（UTCの実行時刻・前回成功時刻をJST、通年UTC+09:00に変換して表示）
