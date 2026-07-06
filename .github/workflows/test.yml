@@ -3,7 +3,6 @@ name: Cron 5min Check
 on:
   schedule:
     - cron: "5 * * * *"
-  workflow_dispatch:
 
 jobs:
   hello:
