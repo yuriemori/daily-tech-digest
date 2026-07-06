@@ -52,6 +52,9 @@
 
 name: "Daily Tech Digest"
 on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/daily-tech-digest.lock.yml]
   schedule:
   - cron: "0 23 * * *"
   workflow_dispatch:
