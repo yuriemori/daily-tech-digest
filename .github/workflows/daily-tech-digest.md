@@ -2,6 +2,7 @@
 emoji: 📰
 name: Daily Tech Digest
 description: Create a Japanese daily digest issue for GitHub, DevOps, DevSecOps, and platform updates.
+model: claude-sonnet-5
 # スケジュール変更ポイント: JST は通年 UTC+09:00。08:00 JST に相当する 23:00 UTC で実行。
 on:
   schedule:
