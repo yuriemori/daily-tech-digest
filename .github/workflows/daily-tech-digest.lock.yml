@@ -471,7 +471,7 @@ jobs:
           for attempt in 1 2 3; do
             bash "${RUNNER_TEMP}/gh-aw/actions/install_awf_binary.sh" v0.27.11 && break
             if [ "$attempt" -eq 3 ]; then
-              echo "AWF installation failed after ${attempt} attempts." >&2
+              echo "AWF installation failed after 3 attempts." >&2
               exit 1
             fi
             echo "AWF installation failed (attempt ${attempt}); retrying in 10 seconds..." >&2
@@ -1381,7 +1381,7 @@ jobs:
           for attempt in 1 2 3; do
             bash "${RUNNER_TEMP}/gh-aw/actions/install_awf_binary.sh" v0.27.11 && break
             if [ "$attempt" -eq 3 ]; then
-              echo "AWF installation failed after ${attempt} attempts." >&2
+              echo "AWF installation failed after 3 attempts." >&2
               exit 1
             fi
             echo "AWF installation failed (attempt ${attempt}); retrying in 10 seconds..." >&2
