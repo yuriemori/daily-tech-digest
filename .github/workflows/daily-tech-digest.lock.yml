@@ -467,7 +467,16 @@ jobs:
         env:
           GH_HOST: github.com
       - name: Install AWF binary
-        run: bash "${RUNNER_TEMP}/gh-aw/actions/install_awf_binary.sh" v0.27.11
+        run: |
+          for attempt in 1 2 3; do
+            bash "${RUNNER_TEMP}/gh-aw/actions/install_awf_binary.sh" v0.27.11 && break
+            if [ "$attempt" -eq 3 ]; then
+              echo "AWF installation failed after 3 attempts." >&2
+              exit 1
+            fi
+            echo "AWF installation failed (attempt ${attempt}); retrying in 10 seconds..." >&2
+            sleep 10
+          done
       - name: Determine automatic lockdown mode for GitHub MCP Server
         id: determine-automatic-lockdown
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0 (source v9)
@@ -1368,7 +1377,16 @@ jobs:
         env:
           GH_HOST: github.com
       - name: Install AWF binary
-        run: bash "${RUNNER_TEMP}/gh-aw/actions/install_awf_binary.sh" v0.27.11
+        run: |
+          for attempt in 1 2 3; do
+            bash "${RUNNER_TEMP}/gh-aw/actions/install_awf_binary.sh" v0.27.11 && break
+            if [ "$attempt" -eq 3 ]; then
+              echo "AWF installation failed after 3 attempts." >&2
+              exit 1
+            fi
+            echo "AWF installation failed (attempt ${attempt}); retrying in 10 seconds..." >&2
+            sleep 10
+          done
       - name: Execute GitHub Copilot CLI
         if: always() && steps.detection_guard.outputs.run_detection == 'true'
         continue-on-error: true
@@ -1594,4 +1612,3 @@ jobs:
             /tmp/gh-aw/safe-output-items.jsonl
             /tmp/gh-aw/temporary-id-map.json
           if-no-files-found: ignore
-
