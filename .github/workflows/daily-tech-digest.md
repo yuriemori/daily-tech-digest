@@ -37,7 +37,6 @@ tools:
   github:
     mode: gh-proxy
     toolsets: [repos, issues, actions, search]
-  web-fetch:
   cli-proxy: true
   bash: [gh, jq, date, cat, grep, sed, awk, printf, mkdir, ls, python3]
 safe-outputs:
