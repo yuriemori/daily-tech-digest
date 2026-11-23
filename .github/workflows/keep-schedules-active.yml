@@ -1,0 +1,23 @@
+name: Keep scheduled workflows active
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "0 0 1,15 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  keepalive:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Create keepalive commit
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit --allow-empty -m "chore: keep scheduled workflows active"
+          git push
